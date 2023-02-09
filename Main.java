@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Objects;
 
 public class Main {
     public static void main(String[] args) {
@@ -35,9 +36,16 @@ public class Main {
         add_menu.setSize(400,500);
         add_menu.setLayout(null);
 
-        Label sign_entry_label = new Label("Sign:");
+        Font font = new Font("Segoe UI Historic", Font.PLAIN,12);
+        System.out.println(font.canDisplayUpTo("\uD808\uDC21"));
+        System.out.println("\uD808\uDC21");
+
+        Label sign_entry_label = new Label("\uD808\uDC21");
+        sign_entry_label.setFont(font);
+        System.out.println(sign_entry_label.getFont());
         sign_entry_label.setBounds(10,10,50,20);
         TextField sign_entry = new TextField();
+        sign_entry.setFont(font);
         sign_entry.setBounds(150,10,150,20);
 
         Label phonetic_entry_label = new Label("Phonetic Reading:");
@@ -50,12 +58,21 @@ public class Main {
         TextField logographic_entry = new TextField();
         logographic_entry.setBounds(150,60,150,20);
 
+        List phonetic_readings = new List();
+        phonetic_readings.setFont(font);
+        phonetic_readings.setBounds(10,120,150,100);
+        List logographic_readings = new List();
+        logographic_readings.setBounds(200,120,150,100);
+
         JButton add_phonetic = new JButton("Add");
         add_phonetic.setBounds(300,35,60,20);
         add_phonetic.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                phonetic_entry.setText("");
+                if(!Objects.equals(phonetic_entry.getText(), "")){
+                    phonetic_readings.add(phonetic_entry.getText());
+                    phonetic_entry.setText("");
+                }
             }
         });
 
@@ -64,8 +81,40 @@ public class Main {
         add_logographic.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println(logographic_entry.getText());
-                logographic_entry.setText("");
+                if(!Objects.equals(logographic_entry.getText(), "")){
+                    logographic_readings.add(logographic_entry.getText());
+                    logographic_entry.setText("");
+                }
+            }
+        });
+
+        Label phonetic_readings_label = new Label("Phonetic Readings");
+        phonetic_readings_label.setBounds(10, 100, 120, 20);
+
+        Label logographic_readings_label = new Label("Logographic Readings");
+        logographic_readings_label.setBounds(200, 100, 150, 20);
+
+        JButton save = new JButton("Save");
+        save.setBounds(10,250,150,80);
+        save.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!Objects.equals(sign_entry.getText(), "")){
+                    Sign new_sign = new Sign(sign_entry.getText());
+                    if(phonetic_readings.getItemCount()>0){
+                        for(int i = 0; i< phonetic_readings.getItemCount(); i++){
+                            new_sign.add_phonetic_reading(phonetic_readings.getItem(i));
+                        }
+                    }
+                    if(logographic_readings.getItemCount()>0){
+                        for(int i = 0; i< logographic_readings.getItemCount(); i++){
+                            new_sign.add_phonetic_reading(logographic_readings.getItem(i));
+                        }
+                    }
+                    database.add(new_sign);
+                    add_menu.dispose();
+                }
+
             }
         });
 
@@ -77,6 +126,11 @@ public class Main {
         add_menu.add(logographic_entry);
         add_menu.add(add_phonetic);
         add_menu.add(add_logographic);
+        add_menu.add(phonetic_readings_label);
+        add_menu.add(logographic_readings_label);
+        add_menu.add(phonetic_readings);
+        add_menu.add(logographic_readings);
+        add_menu.add(save);
         add_menu.setVisible(true);
     }
 
