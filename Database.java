@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.io.*;
 import java.util.LinkedList;
 
@@ -6,24 +7,28 @@ public class Database implements Serializable{
     public LinkedList<Sign> database = new LinkedList<>();
 
     public void add(Sign new_sign){
-        database.add(new_sign);
+        this.database.add(new_sign);
     }
 
-    public void delete(String remove_sign){
-        int removal = search_sign(remove_sign);
-        if(removal>0){
-            database.remove(removal);
+    public boolean delete(String sign){
+        int removal = search_sign(sign);
+        System.out.println(removal);
+        if(removal>=0){
+            this.database.remove(removal);
+            this.write_to_file();
+            return true;
         }
+        return false;
     }
 
     public void sort_sign(){
         //bubble sort
-        for(int i = 0; i<database.size()-1; i++){
-            for(int j = 0; j<database.size()-1; j++){
-                if((database.get(j).getSign().compareTo(database.get(j+1).getSign()))>0){
-                    Sign temp = database.get(j+1);
-                    database.set(j+1, database.get(j));
-                    database.set(j, temp);
+        for(int i = 0; i<this.database.size()-1; i++){
+            for(int j = 0; j<this.database.size()-1; j++){
+                if((this.database.get(j).getSign().compareTo(this.database.get(j+1).getSign()))>0){
+                    Sign temp = this.database.get(j+1);
+                    this.database.set(j+1, this.database.get(j));
+                    this.database.set(j, temp);
                 }
             }
         }
@@ -35,17 +40,17 @@ public class Database implements Serializable{
         //returns position in database
         sort_sign();
         int low = 0;
-        int high = database.size() - 1;
+        int high = this.database.size();
         int mid = (low + high) / 2;
         while(low != high){
-            if(sign.compareToIgnoreCase(database.get(mid).getSign()) == 0){
+            if(sign.compareToIgnoreCase(this.database.get(mid).getSign()) == 0){
                 return mid;
             }
-            if(sign.compareToIgnoreCase(database.get(mid).getSign()) > 0){
-                low = mid + 1;
+            if(sign.compareToIgnoreCase(this.database.get(mid).getSign()) > 0){
+                low = mid;
             }
-            if(sign.compareToIgnoreCase(database.get(mid).getSign()) < 0){
-                high = mid - 1;
+            if(sign.compareToIgnoreCase(this.database.get(mid).getSign()) < 0){
+                high = mid;
             }
             mid = (low + high) / 2;
         }
@@ -54,10 +59,10 @@ public class Database implements Serializable{
 
     public LinkedList<Sign> search_phonetic(String phonetic_reading){
         //Returns a list of sign objects
-        LinkedList<Sign> matching_signs = new LinkedList<>();
-        for(int i = 0; i<database.size(); i++){
-            if(database.get(i).getPhonetic_readings().contains(phonetic_reading)){
-                matching_signs.add(database.get(i));
+        LinkedList<Sign> matching_signs = new LinkedList<Sign>();
+        for (Sign sign : this.database) {
+            if (sign.getPhonetic_readings().contains(phonetic_reading)) {
+                matching_signs.add(sign);
             }
         }
         return matching_signs;
@@ -66,20 +71,20 @@ public class Database implements Serializable{
     public LinkedList<Sign> search_logographic(String logographic_reading){
         //Returns a list of sign objects
         LinkedList<Sign> matching_signs = new LinkedList<>();
-        for(int i = 0; i<database.size(); i++){
-            if(database.get(i).getLogographic_readings().contains(logographic_reading)){
-                matching_signs.add(database.get(i));
+        for (Sign sign : this.database) {
+            if (sign.getLogographic_readings().contains(logographic_reading)) {
+                matching_signs.add(sign);
             }
         }
         return matching_signs;
     }
 
-    public void write_to_file(Database database){
+    public void write_to_file(){
         //Writes entire database class object to a file
         try {
             FileOutputStream fileOut = new FileOutputStream("Database");
             ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
-            objectOut.writeObject(database);
+            objectOut.writeObject(this.database);
             objectOut.close();
             System.out.println("Working");
 
@@ -94,8 +99,8 @@ public class Database implements Serializable{
         try{
             FileInputStream fileIn = new FileInputStream("Database");
             ObjectInputStream objectIn = new ObjectInputStream(fileIn);
-            Database temp = (Database) objectIn.readObject();
-            database = temp.database;
+            LinkedList temp = (LinkedList) objectIn.readObject();
+            this.database = temp;
             objectIn.close();
         } catch (Exception ex) {
             ex.printStackTrace();
